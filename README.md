@@ -1,24 +1,46 @@
 # claude-terminal-kit
 
-여러 창에서 Claude Code를 동시에 돌릴 때 **어느 창이 어느 프로젝트인지** 즉시 알아보고,
-**사용량이 얼마나 남았는지** 한눈에 보기 위한 도구입니다.
+Claude Code 창을 여러 개 띄워놓고 일할 때, **지금 보고 있는 창이 어느 프로젝트인지**
+색으로 즉시 알아보기 위한 Windows Terminal용 status line입니다.
 
-터미널 제목(탭 타이틀)은 Claude Code가 작업중/완료 상태를 표시하는 데 쓰기 때문에 건드리지 않습니다.
-대신 **프로젝트 식별은 색과 세션 하단 라벨**로 분리했습니다.
+![claude-terminal-kit status line](docs/statusline.png)
+
+## 왜 만들었나
+
+프롬프트 창을 여럿 띄워놓으면 창들이 전부 똑같이 생겼습니다. 방금 명령을 넣은 게 어느 창이었는지,
+지금 이 창이 어느 저장소인지 매번 경로를 눈으로 읽어야 합니다. 창이 네다섯 개를 넘어가면
+"어느 창에 뭘 시켰더라"가 실제 사고로 이어집니다.
+
+가장 먼저 떠오르는 해법은 **창 제목에 프로젝트명을 박는 것**인데, 이건 쓸 수 없습니다.
+Claude Code가 제목표시줄을 이미 쓰고 있기 때문입니다 — 세션명과 작업 상태(작업 중 / 완료)를
+거기에 표시하고, 수시로 다시 씁니다. 끼어들면 둘 중 하나가 죽습니다.
+제목을 고정하면 작업 상태 표시가 사라지고, 고정하지 않으면 프로젝트명이 곧바로 덮어써집니다.
+
+그래서 **제목표시줄은 Claude Code에게 그대로 넘기고, 프로젝트 식별을 세션 하단으로 옮겼습니다.**
+프로젝트마다 고유한 색을 배정해 배지로 찍고, 게이지도 같은 색으로 그립니다.
+목적은 읽는 게 아니라 **훑어서 알아보는 것**입니다.
+
+어차피 한 줄을 쓰기로 한 김에, 창을 옮겨다니지 않고도 알아야 하는 것들을 같이 올렸습니다 —
+계정 사용량 한도가 얼마나 남았는지, 컨텍스트에 여유가 있는지, 이 세션이 얼마를 썼는지.
+
+## 무엇이 보이는가
 
 ```
- LARAGON  |  CTX ████░░░░░░  41%  5H ███████░░░  68% 2h13m  7D █████████░  90% 3d22h  |  D:\laragon
- \_(^o.o^)_/  |  Opus 5 (1M context)  effort high  |  ↓310.9k ↑12.2k ($4.23)  |  +1563 -238
+ CLAUDE-TERMINAL-KIT  |  5H ███░░░░░░░  7% 4h40m  7D ███░░░░░░░  8% 6d3h  |  git:main  |  G:\Project\claude-te…
+ \_(^o.o^)_/  |  Opus 5  effort high  think  |  ↓0 ↑0 ($0.00)  |  +0 -0
 ```
 
 | 표시 | 뜻 |
 |---|---|
-| `LARAGON` | 프로젝트명. 배경색이 그 프로젝트의 고유색이고, 게이지 색도 같은 색을 씁니다 |
-| `CTX` | 이 대화의 컨텍스트 사용률 (세션마다 다름) |
-| `5H` / `7D` | 계정 5시간/주간 한도. **열려 있는 모든 창이 같은 값**을 보고, 옆의 `2h13m` 은 리셋까지 남은 시간 |
+| `CLAUDE-TERMINAL-KIT` | 프로젝트명. 배경색이 그 프로젝트의 고유색이고, 게이지 색도 같은 색을 씁니다 |
+| `CTX` | 이 대화의 컨텍스트 사용률 (세션마다 다름). 위 화면처럼 갓 시작한 세션에서는 아직 나오지 않습니다 |
+| `5H` / `7D` | 계정 5시간/주간 한도. **열려 있는 모든 창이 같은 값**을 보고, 옆의 `4h40m` 은 리셋까지 남은 시간 |
+| `git:main` | 현재 브랜치. `git.exe` 를 띄우지 않고 `.git\HEAD` 를 직접 읽습니다 |
+| 경로 | 폭이 모자라면 뒤에서 잘립니다. 프로젝트명은 배지에 이미 있으니 여기서 잘려도 됩니다 |
 | `\_(^o.o^)_/` | 유휴. 작업 중이면 `*_(^o.o^)b'` 로 팔을 두드리고, 서브에이전트가 돌면 `*_(#>.<#)b'` 분노 모드 |
+| `Opus 5` `effort high` `think` | 지금 걸려 있는 모드. `FAST`, `style`, `agent`, vim 모드도 켜져 있을 때만 나옵니다 |
 | `↓ / ↑` | 세션 누적 읽기/쓰기 토큰과 추정 비용 |
-| `+1563 -238` | 세션 중 추가/삭제된 코드 줄 수 |
+| `+0 -0` | 세션 중 추가/삭제된 코드 줄 수 |
 
 **게이지 갱신 시점은 명령 제출 시와 완료 시 두 번뿐입니다.** 명령 도중에 숫자가 계속 꿈틀대면
 직전 명령과 비교가 안 되기 때문입니다. 반면 `effort` 같은 모드 표시는 실시간입니다.
@@ -43,7 +65,7 @@ irm https://raw.githubusercontent.com/Berry-G/claude-terminal-kit/main/bootstrap
 `iex` 는 인자를 넘길 수 없어서, 옵션은 **환경변수**로 받습니다:
 
 ```powershell
-$env:CCKIT_ROOT   = 'D:\laragon\www'   # 프로젝트 폴더 위치 (자동 감지와 다를 때)
+$env:CCKIT_ROOT   = 'G:\Project'       # 프로젝트 폴더 위치 (자동 감지와 다를 때)
 $env:CCKIT_RECENT = '12'               # 최근 쓴 프로젝트 12개의 탭 프로필까지 생성
 irm https://raw.githubusercontent.com/Berry-G/claude-terminal-kit/main/bootstrap.ps1 | iex
 ```
@@ -83,8 +105,17 @@ git이 없으면 [ZIP 다운로드](https://github.com/Berry-G/claude-terminal-k
 `-TitleHook` 은 선택입니다. status line만으로도 프로젝트 식별은 충분하고,
 이 훅은 콘솔마다 감시 프로세스를 하나씩 띄웁니다. 제목까지 이중으로 표시하고 싶을 때만 쓰세요.
 
-프로젝트 루트는 지정하지 않으면 `D:\laragon\www` → `C:\laragon\www` → `%USERPROFILE%\laragon\www`
-→ `D:\www` → `C:\www` → `C:\xampp\htdocs` → `C:\wamp64\www` 순으로 탐색합니다.
+**프로젝트 루트**는 프로젝트 폴더들이 나란히 들어 있는 상위 폴더입니다(`G:\Project` 아래
+`G:\Project\claude-terminal-kit`, `G:\Project\fletcher` … 처럼). `cc` 가 이 폴더를 훑어
+목록을 만들고, 색도 여기 있는 폴더명 기준으로 배정됩니다.
+
+지정하지 않으면 이 순서로 찾습니다:
+
+1. 고정 드라이브 전체(`C:`, `D:`, `G:` …)에서 `\Project`, `\Projects`, `\Dev`, `\src`, `\Code`, `\repos`, `\workspace`
+2. `%USERPROFILE%` 아래 `source\repos`, `Projects`, `Dev`, `git`, `repos`
+3. 웹 스택 docroot — `laragon\www`, `D:\www`, `C:\xampp\htdocs`, `C:\wamp64\www`
+
+엉뚱한 곳을 잡았다면 `-Root` 로 다시 설치하면 됩니다(`~\.claude\cc-config.json` 에 기록됩니다).
 
 ### 설치 후
 
@@ -122,10 +153,10 @@ git이 없으면 [ZIP 다운로드](https://github.com/Berry-G/claude-terminal-k
 ## 사용법
 
 ```powershell
-cc                  # 프로젝트 목록
-cc claude-terminal-kit          # 색 지정된 새 탭에서 claude 실행
-cc terminal              # 부분 매칭 (모호하면 후보를 알려줌)
-cc fletcher -NewWindow # 새 창으로
+cc                          # 프로젝트 목록
+cc claude-terminal-kit      # 색 지정된 새 탭에서 claude 실행
+cc terminal                 # 부분 매칭 (모호하면 후보를 알려줌)
+cc fletcher -NewWindow      # 새 창으로
 
 # 자주 쓰는 프로젝트는 아예 탭 프로필로 등록 (새 탭 메뉴에 나옴)
 ~\.claude\tools\New-CCProfiles.ps1 -Recent 20
@@ -199,7 +230,7 @@ workspace trust 다이얼로그를 수락해야 합니다(status line은 셸 명
 스크립트 자체는 아래로 직접 확인할 수 있습니다:
 
 ```powershell
-'{"workspace":{"project_dir":"D:\\laragon\\www\\test"},"model":{"display_name":"Opus 5"},"context_window":{"used_percentage":42}}' |
+'{"workspace":{"project_dir":"G:\\Project\\claude-terminal-kit"},"model":{"display_name":"Opus 5"},"context_window":{"used_percentage":42}}' |
   pwsh -NoProfile -File ~\.claude\statusline.ps1
 ```
 
@@ -207,7 +238,7 @@ workspace trust 다이얼로그를 수락해야 합니다(status line은 셸 명
 `settings.json` 의 `statusLine.refreshInterval` 을 4~5로 올리세요. 한 번 재보려면:
 
 ```powershell
-Measure-Command { '{"workspace":{"project_dir":"D:\\test"}}' | pwsh -NoProfile -File ~\.claude\statusline.ps1 }
+Measure-Command { '{"workspace":{"project_dir":"G:\\Project\\test"}}' | pwsh -NoProfile -File ~\.claude\statusline.ps1 }
 ```
 
 **색이 없거나 이상한 문자가 섞임** — 터미널이 24비트 색을 지원해야 합니다(Windows Terminal 권장).

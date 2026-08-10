@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     For the projects that don't warrant a permanent profile (there are 52 folders
-    under D:\laragon\www and the new-tab menu can only hold so many). Assigns the
+    under the projects root and the new-tab menu can only hold so many). Assigns the
     project a color on first use and records it in cc-colors.json, so the tab
     color matches the block statusline.ps1 draws inside the session.
 

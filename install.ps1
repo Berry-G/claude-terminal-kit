@@ -14,7 +14,7 @@
     Install with auto-detected project root, no profiles generated yet.
 
 .EXAMPLE
-    .\install.ps1 -Root D:\laragon\www -Recent 12
+    .\install.ps1 -Root G:\Project -Recent 12
     Install and immediately create Windows Terminal profiles for the 12 most
     recently used projects.
 
@@ -27,7 +27,8 @@
 #>
 [CmdletBinding()]
 param(
-    # Projects root (e.g. D:\laragon\www). Auto-detected when omitted.
+    # Folder that holds the project folders (e.g. G:\Project). Auto-detected
+    # when omitted -- see Get-CCRoot in cc-palette.ps1 for the probe order.
     [string]$Root,
 
     # Also generate Windows Terminal profiles for the N most recent projects

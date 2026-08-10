@@ -25,6 +25,22 @@ function Get-CCRoot {
             if ($cfg.root -and (Test-Path $cfg.root)) { return $cfg.root }
         } catch {}
     }
+    # Drive letters are not hardcoded: a projects folder lives on D: or G: as
+    # often as on C:, and guessing only C: was the reason this used to land on a
+    # web docroot that held none of the actual work.
+    $names = 'Project', 'Projects', 'Dev', 'src', 'Code', 'repos', 'workspace'
+    foreach ($d in [IO.DriveInfo]::GetDrives()) {
+        if (-not $d.IsReady -or $d.DriveType -ne 'Fixed') { continue }
+        foreach ($n in $names) {
+            $p = Join-Path $d.RootDirectory.FullName $n
+            if (Test-Path $p) { return $p }
+        }
+    }
+    foreach ($n in 'source\repos', 'Projects', 'Dev', 'git', 'repos') {
+        $p = Join-Path $env:USERPROFILE $n
+        if (Test-Path $p) { return $p }
+    }
+    # Web stacks keep the projects under a fixed docroot instead of a plain folder
     foreach ($p in @(
             'D:\laragon\www', 'C:\laragon\www',
             (Join-Path $env:USERPROFILE 'laragon\www'),

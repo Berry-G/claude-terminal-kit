@@ -15,7 +15,7 @@
     `iex` executes a string and cannot pass parameters, so options come from
     environment variables set before the call:
 
-        $env:CCKIT_ROOT      = 'D:\laragon\www'   -> install.ps1 -Root
+        $env:CCKIT_ROOT      = 'G:\Project'       -> install.ps1 -Root
         $env:CCKIT_RECENT    = '12'               -> install.ps1 -Recent
         $env:CCKIT_TITLEHOOK = '1'                -> install.ps1 -TitleHook
         $env:CCKIT_NOALIAS   = '1'                -> install.ps1 -NoAlias
