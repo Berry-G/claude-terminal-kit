@@ -1,0 +1,13 @@
+# machine-local state -- never belongs in the repo
+cc-colors.json
+cc-config.json
+*.bak
+
+# Serena project index / memories are per-checkout, not part of the kit
+.serena/
+
+# editors, OS
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
